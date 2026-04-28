@@ -13,7 +13,20 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     environment:
-      - ROOT_PATH=/api
+      - MONGO_URL=mongodb://mongo_db:27017
+    depends_on:
+      - mongo_db
+
+  api_stock:
+    container_name: api_stock
+    build:
+      dockerfile: Dockerfile
+      context: ./api_stock
+    volumes:
+      - ./api_stock:/app
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
       - MONGO_URL=mongodb://mongo_db:27017
     depends_on:
       - mongo_db
@@ -31,12 +44,16 @@ services:
     container_name: nginx_dietetica
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/cors-prod.conf:/etc/nginx/cors/cors.conf
+      - ./cert.pem:/etc/nginx/cert.pem
+      - ./key.pem:/etc/nginx/key.pem
+      # - ./nginx/cors-prod.conf:/etc/nginx/cors/cors.conf
       - media_files:/var/www/static/media
     ports:
       - "8092:80"
+      - "8443:443"
     depends_on:
       - api_productos
+      - api_stock
 
 volumes:
   mongo_db_data:

@@ -14,7 +14,6 @@ app = FastAPI(
     title="API Productos",
     description="Microservicio de gestión de productos",
     version="1.0.0",
-    root_path=os.getenv("ROOT_PATH", ""), 
     lifespan=lifespan
 )
 
