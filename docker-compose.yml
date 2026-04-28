@@ -1,0 +1,43 @@
+services:
+  redis_dietetica:
+    image: redis:7.4
+    container_name: redis_dietetica
+
+  api_productos:
+    container_name: api_productos
+    build:
+      dockerfile: Dockerfile
+      context: ./api_productos
+    volumes:
+      - ./api_productos:/app
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - ROOT_PATH=/api
+      - MONGO_URL=mongodb://mongo_db:27017
+    depends_on:
+      - mongo_db
+
+  mongo_db:
+    image: mongo:7
+    container_name: mongo_db
+    volumes:
+      - mongo_db_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: dietetica
+
+  nginx_dietetica:
+    image: nginx:stable
+    container_name: nginx_dietetica
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/cors-prod.conf:/etc/nginx/cors/cors.conf
+      - media_files:/var/www/static/media
+    ports:
+      - "8092:80"
+    depends_on:
+      - api_productos
+
+volumes:
+  mongo_db_data:
+  media_files:
